@@ -117,38 +117,38 @@ public class ControlAssembler implements ActionListener {
             byte arg = (byte) (0b00001111 & ram[i]);
             SistemaSAP.TipoInstruccion opType = sistema.decodificarInstruccion(opCode);
             switch (opType) {
-                case LDA:
-                    out += "LDA\t" + argTo4BitString(arg);
+                case CAR:
+                    out += "CAR\t" + argTo4BitString(arg);
                     break;
-                case NOP:
-                    out += "NOP";
+                case NIN:
+                    out += "NIN";
                     break;
-                case ADD:
-                    out += "ADD\t" + argTo4BitString(arg);
+                case SUM:
+                    out += "SUM\t" + argTo4BitString(arg);
                     break;
-                case SUB:
-                    out += "SUB\t" + argTo4BitString(arg);
+                case RES:
+                    out += "RES\t" + argTo4BitString(arg);
                     break;
-                case STA:
-                    out += "STA\t" + argTo4BitString(arg);
+                case ALM:
+                    out += "ALM\t" + argTo4BitString(arg);
                     break;
-                case LDI:
-                    out += "LDI\t" + argTo4BitString(arg);
+                case CAI:
+                    out += "CAI\t" + argTo4BitString(arg);
                     break;
-                case JMP:
-                    out += "JMP\t" + argTo4BitString(arg);
+                case SAL:
+                    out += "SAL\t" + argTo4BitString(arg);
                     break;
-                case JC:
-                    out += "JC\t" + argTo4BitString(arg);
+                case SMI:
+                    out += "SMI\t" + argTo4BitString(arg);
                     break;
-                case JZ:
-                    out += "JZ\t" + argTo4BitString(arg);
+                case SIG:
+                    out += "SIG\t" + argTo4BitString(arg);
                     break;
                 case OUT:
                     out += "OUT";
                     break;
-                case HLT:
-                    out += "HLT";
+                case FIN:
+                    out += "FIN";
                     break;
                 default:
                     break;
@@ -316,21 +316,21 @@ public class ControlAssembler implements ActionListener {
             }
         }
 
-        // Asegúrese de que todas las instrucciones JMP/JC/JZ que usaban etiquetas fueron reemplazadas
+        // Asegúrese de que todas las instrucciones SAL/SMI/SIG que usaban etiquetas fueron reemplazadas
         for (int i = 0; i < result.size(); i++) {
             // Toma la instrucción actual
             String curr = result.get(i);
 
             // Comprobar si es una sucursal
-            if (curr.indexOf("JMP") != -1) {
+            if (curr.indexOf("SAL") != -1) {
                 if (curr.substring(3).matches("[a-zA-Z]+")) {
                     return "<html>[Error ensamblador] No se puede compilar la siguiente instrucción: " + curr + "</html>";
                 }
-            } else if (curr.indexOf("JC") != -1) {
+            } else if (curr.indexOf("SMI") != -1) {
                 if (curr.substring(2).matches("[a-zA-Z]+")) {
                     return "<html>[Error ensamblador] No se puede compilar la siguiente instrucción: " + curr + "</html>";
                 }
-            } else if (curr.indexOf("JZ") != -1) {
+            } else if (curr.indexOf("SIG") != -1) {
                 if (curr.substring(2).matches("[a-zA-Z]+")) {
                     return "<html>[Error ensamblador] No se puede compilar la siguiente instrucción: " + curr + "</html>";
                 }
@@ -352,17 +352,17 @@ public class ControlAssembler implements ActionListener {
             // Agregar valor binario
             SistemaSAP.TipoInstruccion iVal = parseInstruction(curr);
             switch (iVal) {
-                case NOP:
+                case NIN:
                     // Establecer el OP Code (instrucción)
                     rArr[i] = "00000000";
                     break;
-                case LDA:
+                case CAR:
                     // Agregar el código OP
                     rArr[i] = "0001";
 
                     // Validar que se proporcionó un argumento
                     if (curr.length() == 3) {
-                        return "<html>[Error ensamblador] Argumento faltante en LDA</html>";
+                        return "<html>[Error ensamblador] Argumento faltante en CAR</html>";
                     }
 
                     // Convertir argumento a binario
@@ -372,13 +372,13 @@ public class ControlAssembler implements ActionListener {
                     rArr[i] += argToBinary(curr.substring(3), varAddressLookup);
 
                     break;
-                case ADD:
+                case SUM:
                     // OP Code
                     rArr[i] = "0010";
 
                     // Validar que se proporcionó un argumento
                     if (curr.length() == 3) {
-                        return "<html>[Error ensamblador] Argumento faltante en ADD</html>";
+                        return "<html>[Error ensamblador] Argumento faltante en SUM</html>";
                     }
 
                     // a binario
@@ -388,12 +388,12 @@ public class ControlAssembler implements ActionListener {
                     rArr[i] += argToBinary(curr.substring(3), varAddressLookup);
 
                     break;
-                case SUB:
+                case RES:
                     // OP Code
                     rArr[i] = "0011";
                     
                     if (curr.length() == 3) {
-                        return "<html>[Error ensamblador] Argumento faltante en SUB</html>";
+                        return "<html>[Error ensamblador] Argumento faltante en RES</html>";
                     }
 
                     // a binario
@@ -403,12 +403,12 @@ public class ControlAssembler implements ActionListener {
                     rArr[i] += argToBinary(curr.substring(3), varAddressLookup);
 
                     break;
-                case STA:
+                case ALM:
                     // OP Code
                     rArr[i] = "0100";
 
                     if (curr.length() == 3) {
-                        return "<html>[Error ensamblador] Argumento faltante en STA</html>";
+                        return "<html>[Error ensamblador] Argumento faltante en ALM</html>";
                     }
 
                     if (argToBinary(curr.substring(3), varAddressLookup) == null) {
@@ -417,31 +417,31 @@ public class ControlAssembler implements ActionListener {
                     rArr[i] += argToBinary(curr.substring(3), varAddressLookup);
 
                     break;
-                case LDI:
+                case CAI:
                     // OP Code
                     rArr[i] = "0101";
 
                     // argumento 
                     if (curr.length() != 7) {
-                        return "<html>[Error ensamblador] LDI debe tomar una cadena binaria de 4 bits</html>";
+                        return "<html>[Error ensamblador] CAI debe tomar una cadena binaria de 4 bits</html>";
                     }
 
                     // Tomar el argumento
-                    String argLDI = curr.substring(3);
+                    String argCAI = curr.substring(3);
 
-                    // Asegúrese de que el argumento LDI sea una cadena binaria de 4 bits
-                    if (!isValidBinaryString(argLDI)) {
-                        return "<html>[Error ensamblador] LDI debe tomar una cadena binaria de 4 bits</html>";
+                    // Asegúrese de que el argumento CAI sea una cadena binaria de 4 bits
+                    if (!isValidBinaryString(argCAI)) {
+                        return "<html>[Error ensamblador] CAI debe tomar una cadena binaria de 4 bits</html>";
                     }
 
                     // Agregar argumento al programa compilado
-                    rArr[i] += padBinaryString4Bits(argLDI);
+                    rArr[i] += padBinaryString4Bits(argCAI);
 
                     break;
-                case JMP:
+                case SAL:
                     // existe argumento?
                     if (curr.length() == 3) {
-                        return "<html>[Error ensamblador] Falta el argumento en JMP. </html>";
+                        return "<html>[Error ensamblador] Falta el argumento en SAL. </html>";
                     }
 
                     // OP Code
@@ -452,22 +452,22 @@ public class ControlAssembler implements ActionListener {
 
                     // Case 0: No hay argumento 
                     if (arg == null || arg.length() == 0) {
-                        return "<html>[Error ensamblador] No se ha dado ningún argumento a la instrucción JMP.</html>";
+                        return "<html>[Error ensamblador] No se ha dado ningún argumento a la instrucción SAL.</html>";
                     }
 
                     // Case 1: El argumento no es una cadena binaria válida
                     if (!this.isValidBinaryString(arg)) {
-                        return "<html>[Error ensamblador] El argumento de JMP debe ser una cadena binaria válida.</html>";
+                        return "<html>[Error ensamblador] El argumento de SAL debe ser una cadena binaria válida.</html>";
                     }
 
                     // Case 2: El argumento es binario.
                     rArr[i] += padBinaryString4Bits(arg);
 
                     break;
-                case JC:
+                case SMI:
                     // argumento existe?
                     if (curr.length() == 2) {
-                        return "<html>[Error ensamblador] Falta el argumento en JC. </html>";
+                        return "<html>[Error ensamblador] Falta el argumento en SMI. </html>";
                     }
 
                     // OP Code
@@ -478,22 +478,22 @@ public class ControlAssembler implements ActionListener {
 
                     // Case 0 : No hay argumento 
                     if (argC == null || argC.length() == 0) {
-                        return "<html>[Error ensamblador] No se ha dado ningún argumento a la instrucción JC.</html>";
+                        return "<html>[Error ensamblador] No se ha dado ningún argumento a la instrucción SMI.</html>";
                     }
 
                     // Case 1: El argumento no es una cadena binaria válida
                     if (!this.isValidBinaryString(argC)) {
-                        return "<html>[Error ensamblador] El argumento de JC debe ser una cadena binaria válida.</html>";
+                        return "<html>[Error ensamblador] El argumento de SMI debe ser una cadena binaria válida.</html>";
                     }
 
                     // Case 2: AEl argumento es binario.
                     rArr[i] += padBinaryString4Bits(argC);
 
                     break;
-                case JZ:
+                case SIG:
                     // argumento existe?
                     if (curr.length() == 2) {
-                        return "<html>[Error ensamblador] Falta el argumento en JZ. </html>";
+                        return "<html>[Error ensamblador] Falta el argumento en SIG. </html>";
                     }
 
                     // Establecer los 4 bits más significativos
@@ -504,12 +504,12 @@ public class ControlAssembler implements ActionListener {
 
                     // Case 1 : No hay argumento 
                     if (argZ == null || argZ.length() != 4) {
-                        return "<html>[Error ensamblador] No se ha dado ningún argumento a la instrucción JZ.</html>";
+                        return "<html>[Error ensamblador] No se ha dado ningún argumento a la instrucción SIG.</html>";
                     }
 
                     // Case 2: El argumento no es una cadena binaria válida
                     if (!this.isValidBinaryString(argZ)) {
-                        return "<html>[Error ensamblador] El argumento de JZ debe ser una cadena binaria válida.</html>";
+                        return "<html>[Error ensamblador] El argumento de SIG debe ser una cadena binaria válida.</html>";
                     }
 
                     // Case 3: Argumento es binario
@@ -526,10 +526,10 @@ public class ControlAssembler implements ActionListener {
                     rArr[i] = "11100000";
 
                     break;
-                case HLT:
+                case FIN:
                     // Asegúrese de que no se proporcionó ningún argumento
                     if (curr.length() != 3) {
-                        return "<html>[Error ensamblador] La instrucción HLT no tiene parámetros.</html>";
+                        return "<html>[Error ensamblador] La instrucción FIN no tiene parámetros.</html>";
                     }
 
                     // Op Code
@@ -563,28 +563,28 @@ public class ControlAssembler implements ActionListener {
     }
 
     private SistemaSAP.TipoInstruccion parseInstruction(String curr) {
-        if (curr.indexOf("ADD") != -1) {
-            return SistemaSAP.TipoInstruccion.ADD;
-        } else if (curr.indexOf("SUB") != -1) {
-            return SistemaSAP.TipoInstruccion.SUB;
-        } else if (curr.indexOf("NOP") != -1) {
-            return SistemaSAP.TipoInstruccion.NOP;
-        } else if (curr.indexOf("LDA") != -1) {
-            return SistemaSAP.TipoInstruccion.LDA;
-        } else if (curr.indexOf("STA") != -1) {
-            return SistemaSAP.TipoInstruccion.STA;
-        } else if (curr.indexOf("LDI") != -1) {
-            return SistemaSAP.TipoInstruccion.LDI;
-        } else if (curr.indexOf("JMP") != -1) {
-            return SistemaSAP.TipoInstruccion.JMP;
-        } else if (curr.indexOf("JZ") != -1) {
-            return SistemaSAP.TipoInstruccion.JZ;
-        } else if (curr.indexOf("JC") != -1) {
-            return SistemaSAP.TipoInstruccion.JC;
+        if (curr.indexOf("SUM") != -1) {
+            return SistemaSAP.TipoInstruccion.SUM;
+        } else if (curr.indexOf("RES") != -1) {
+            return SistemaSAP.TipoInstruccion.RES;
+        } else if (curr.indexOf("NIN") != -1) {
+            return SistemaSAP.TipoInstruccion.NIN;
+        } else if (curr.indexOf("CAR") != -1) {
+            return SistemaSAP.TipoInstruccion.CAR;
+        } else if (curr.indexOf("ALM") != -1) {
+            return SistemaSAP.TipoInstruccion.ALM;
+        } else if (curr.indexOf("CAI") != -1) {
+            return SistemaSAP.TipoInstruccion.CAI;
+        } else if (curr.indexOf("SAL") != -1) {
+            return SistemaSAP.TipoInstruccion.SAL;
+        } else if (curr.indexOf("SIG") != -1) {
+            return SistemaSAP.TipoInstruccion.SIG;
+        } else if (curr.indexOf("SMI") != -1) {
+            return SistemaSAP.TipoInstruccion.SMI;
         } else if (curr.indexOf("OUT") != -1) {
             return SistemaSAP.TipoInstruccion.OUT;
-        } else if (curr.indexOf("HLT") != -1) {
-            return SistemaSAP.TipoInstruccion.HLT;
+        } else if (curr.indexOf("FIN") != -1) {
+            return SistemaSAP.TipoInstruccion.FIN;
         }
         return SistemaSAP.TipoInstruccion.INVALID;
     }

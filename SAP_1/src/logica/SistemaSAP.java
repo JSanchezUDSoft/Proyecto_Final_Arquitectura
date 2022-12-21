@@ -1,4 +1,4 @@
-package logica;
+package logica; 
 
 import interfaces.IClockObserver;
 import interfaces.IRegistro;
@@ -9,31 +9,44 @@ import java.util.List;
 public class SistemaSAP implements IClockObserver {
     
     // Asignamos valores enteros constantes a cada señal de línea de control
-    public static final int HLT = 0;
-    public static final int MI = 1;
-    public static final int RI = 2;
-    public static final int RO = 3;
-    public static final int IO = 4;
-    public static final int II = 5;
-    public static final int AI = 6;
-    public static final int AO = 7;
-    public static final int SO = 8;
-    public static final int SU = 9;
-    public static final int BI = 10;
-    public static final int OI = 11;
-    public static final int CE = 12;
-    public static final int CO = 13;
-    public static final int J = 14;
-    public static final int FI = 15;
-
+    public static final int FIN = 0;    //DETENCION
+    public static final int MI = 1;     //REGISTRO DE ACCESO A MEMORIA MAR
+    public static final int RI = 2;     //RAM
+    public static final int RO = 3;     //RAM
+    public static final int IO = 4;     //REGISTRO DE INSTRUCCION
+    public static final int II = 5;     //REGISTRO DE INSTRUCCION
+    public static final int AI = 6;     //REGISTRO A
+    public static final int AO = 7;     //REGISTRO A
+    public static final int SO = 8;     //ALU
+    public static final int SU = 9;     //ALU
+    public static final int BI = 10;    //REGISTRO B
+    public static final int OI = 11;    //REGISTRO OUT
+    public static final int CE = 12;    //PROGRAM COUNTER
+    public static final int CO = 13;    //PROGRAM COUNTER
+    public static final int J = 14;     //
+    public static final int FI = 15;    //FLAGS
+    
     // Enumera los tipos de registros válidos en SAP-1
     public enum TipoRegistro {
         A, B, ALU, IR, OUT, PC, MAR, BUS
     }
 
-    // Enumera los tipos de instrucciones válidas admitidas en el simulador
+    //ISA
+    
+    //NIN: NINGUNA OPERACION
+    //CAR: CARGAR EN LA DIRECCION X
+    //SUM: SUMAR  
+    //RES: REALMR   
+    //ALM: ALMACENAR EN LA DIRECCION X
+    //CAI: CARGAR INDIRECTAMENTE EN LA DIRECCION X
+    //SAL: SALTO
+    //SMI: SALTA SI ES MAYOR O IGUAL DESPUES DE COMPARAR
+    //SIG: SALTA SI SON IGUALES DESPUES DE COMPARAR
+    //OUT: SALIDA
+    //FIN: DETENER EJECUCION
+    //INVALID: INVALIDO
     public enum TipoInstruccion {
-        NOP, LDA, ADD, SUB, STA, LDI, JMP, JC, JZ, OUT, HLT, INVALID
+        NIN, CAR, SUM, RES, ALM, CAI, SAL, SMI, SIG, OUT, FIN, INVALID
     }
 
     // Contenido del SAP-1
@@ -150,27 +163,27 @@ public class SistemaSAP implements IClockObserver {
         //System.out.printf("INS: %x\n", instruccion);
         switch (instruccion) {
             case 0:
-                return TipoInstruccion.NOP;
+                return TipoInstruccion.NIN;
             case 1:
-                return TipoInstruccion.LDA;
+                return TipoInstruccion.CAR;
             case 2:
-                return TipoInstruccion.ADD;
+                return TipoInstruccion.SUM;
             case 3:
-                return TipoInstruccion.SUB;
+                return TipoInstruccion.RES;
             case 4:
-                return TipoInstruccion.STA;
+                return TipoInstruccion.ALM;
             case 5:
-                return TipoInstruccion.LDI;
+                return TipoInstruccion.CAI;
             case 6:
-                return TipoInstruccion.JMP;
+                return TipoInstruccion.SAL;
             case 7:
-                return TipoInstruccion.JC;
+                return TipoInstruccion.SMI;
             case 8:
-                return TipoInstruccion.JZ;
+                return TipoInstruccion.SIG;
             case 14:
                 return TipoInstruccion.OUT;
             case 15:
-                return TipoInstruccion.HLT;
+                return TipoInstruccion.FIN;
             default:
                 // Las instrucciones 0b1001, 0b1010, 0b1011, 0b1100, 0b1101 (9-13) no están implementadas
                 return TipoInstruccion.INVALID;
@@ -188,38 +201,38 @@ public class SistemaSAP implements IClockObserver {
 
         // Manejar el resultado de la instrucción decodificada
         switch (t) {
-            case NOP:
-                log += "NOP";
+            case NIN:
+                log += "NIN";
                 break;
-            case LDA:
-                log += "LDA";
+            case CAR:
+                log += "CAR";
                 break;
-            case ADD:
-                log += "ADD";
+            case SUM:
+                log += "SUM";
                 break;
-            case SUB:
-                log += "SUB";
+            case RES:
+                log += "RES";
                 break;
-            case STA:
-                log += "STA";
+            case ALM:
+                log += "ALM";
                 break;
-            case LDI:
-                log += "LDI";
+            case CAI:
+                log += "CAI";
                 break;
-            case JMP:
-                log += "JMP";
+            case SAL:
+                log += "SAL";
                 break;
-            case JC:
-                log += "JC";
+            case SMI:
+                log += "SMI";
                 break;
-            case JZ:
-                log += "JZ";
+            case SIG:
+                log += "SIG";
                 break;
             case OUT:
                 log += "OUT";
                 break;
-            case HLT:
-                log += "HLT";
+            case FIN:
+                log += "FIN";
                 break;
             default:
                 log += "N/A";
@@ -227,7 +240,7 @@ public class SistemaSAP implements IClockObserver {
 
         // Luego, agregue el argumento al Log
         log += " ";
-        if (t != TipoInstruccion.NOP && t != TipoInstruccion.INVALID && t != TipoInstruccion.HLT
+        if (t != TipoInstruccion.NIN && t != TipoInstruccion.INVALID && t != TipoInstruccion.FIN
                 && t != TipoInstruccion.OUT) {
             log += this.getRAM().getData()[address] & 0b00001111;
         }
@@ -272,58 +285,58 @@ public class SistemaSAP implements IClockObserver {
                 default:
                     // Averiguar qué instrucción estamos ejecutando
                     TipoInstruccion instruccionActual = this.decodificarIR();
-                    if (instruccionActual == TipoInstruccion.NOP) {
+                    if (instruccionActual == TipoInstruccion.NIN) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("NOP => No lineas de control");
+                            EventLog.getEventLog().addEntrada("NIN => No lineas de control");
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("NOP => No lineas de control");
+                            EventLog.getEventLog().addEntrada("NIN => No lineas de control");
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("NOP => No lineas de control");
+                            EventLog.getEventLog().addEntrada("NIN => No lineas de control");
                         }                        
                     }
-                    if (instruccionActual == TipoInstruccion.LDA) {
+                    if (instruccionActual == TipoInstruccion.CAR) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             this.lineasControl[IO] = true;
                             this.lineasControl[MI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("LDA => IO, MI activadas");
+                            EventLog.getEventLog().addEntrada("CAR => IO, MI activadas");
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             this.lineasControl[RO] = true;
                             this.lineasControl[AI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("LDA => RO, AI activadas");
+                            EventLog.getEventLog().addEntrada("CAR => RO, AI activadas");
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("LDA => No hace nada");
+                            EventLog.getEventLog().addEntrada("CAR => No hace nada");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.ADD) {
+                    if (instruccionActual == TipoInstruccion.SUM) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             this.lineasControl[IO] = true;
                             this.lineasControl[MI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("ADD => IO, MI activadas");
+                            EventLog.getEventLog().addEntrada("SUM => IO, MI activadas");
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             this.lineasControl[RO] = true;
                             this.lineasControl[BI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("ADD => RO, BI activadas");
+                            EventLog.getEventLog().addEntrada("SUM => RO, BI activadas");
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
@@ -331,23 +344,23 @@ public class SistemaSAP implements IClockObserver {
                             this.lineasControl[FI] = true;
                             this.lineasControl[AI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("ADD => ∑O, FI, AI activadas");
+                            EventLog.getEventLog().addEntrada("SUM => ∑O, FI, AI activadas");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.SUB) {
+                    if (instruccionActual == TipoInstruccion.RES) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             this.lineasControl[IO] = true;
                             this.lineasControl[MI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("SUB => IO, MI activadas");
+                            EventLog.getEventLog().addEntrada("RES => IO, MI activadas");
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             this.lineasControl[RO] = true;
                             this.lineasControl[BI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("SUB => RO, BI activadas");
+                            EventLog.getEventLog().addEntrada("RES => RO, BI activadas");
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
@@ -356,78 +369,78 @@ public class SistemaSAP implements IClockObserver {
                             this.lineasControl[FI] = true;
                             this.lineasControl[AI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("SUB => ∑O, SU, AI, FI activadas");
+                            EventLog.getEventLog().addEntrada("RES => ∑O, SU, AI, FI activadas");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.STA) {
+                    if (instruccionActual == TipoInstruccion.ALM) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             this.lineasControl[IO] = true;
                             this.lineasControl[MI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("STA => IO, MI activadas");
+                            EventLog.getEventLog().addEntrada("ALM => IO, MI activadas");
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             this.lineasControl[AO] = true;
                             this.lineasControl[RI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("STA => AO, RI activadas");
+                            EventLog.getEventLog().addEntrada("ALM => AO, RI activadas");
 
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("STA => No hace nada");
+                            EventLog.getEventLog().addEntrada("ALM => No hace nada");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.LDI) {
+                    if (instruccionActual == TipoInstruccion.CAI) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             this.lineasControl[IO] = true;
                             this.lineasControl[AI] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("LDI => IO, AI activadas");
+                            EventLog.getEventLog().addEntrada("CAI => IO, AI activadas");
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("LDI => No hace nada");
+                            EventLog.getEventLog().addEntrada("CAI => No hace nada");
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("LDI => No hace nada");
+                            EventLog.getEventLog().addEntrada("CAI => No hace nada");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.JMP) {
+                    if (instruccionActual == TipoInstruccion.SAL) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             this.lineasControl[IO] = true;
                             this.lineasControl[J] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("JMP => IO, J activadas");
+                            EventLog.getEventLog().addEntrada("SAL => IO, J activadas");
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("JMP => No hace nada");
+                            EventLog.getEventLog().addEntrada("SAL => No hace nada");
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("JMP => No hace nada");
+                            EventLog.getEventLog().addEntrada("SAL => No hace nada");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.JC) {
+                    if (instruccionActual == TipoInstruccion.SMI) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             if (this.getFlags().getCF()) {
                                 this.lineasControl[IO] = true;
                                 this.lineasControl[J] = true;
-                                EventLog.getEventLog().addEntrada("JC => IO, J activadas ya que CF=1");
+                                EventLog.getEventLog().addEntrada("SMI => IO, J activadas ya que CF=1");
                             } else {
-                                EventLog.getEventLog().addEntrada("JC => IO, No hace nada ya que CF=0");
+                                EventLog.getEventLog().addEntrada("SMI => IO, No hace nada ya que CF=0");
                             }
                             notificarCambioLineasControl();
                         }
@@ -435,36 +448,36 @@ public class SistemaSAP implements IClockObserver {
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("JC => No hace nada");
+                            EventLog.getEventLog().addEntrada("SMI => No hace nada");
                         }
 
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("JZ => No hace nada");
+                            EventLog.getEventLog().addEntrada("SIG => No hace nada");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.JZ) {
+                    if (instruccionActual == TipoInstruccion.SIG) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
                             if (this.getFlags().getZF()) {
                                 this.lineasControl[IO] = true;
                                 this.lineasControl[J] = true;
-                                EventLog.getEventLog().addEntrada("JZ => IO, J activadas ya que ZF=1");
+                                EventLog.getEventLog().addEntrada("SIG => IO, J activadas ya que ZF=1");
                             } else {
-                                EventLog.getEventLog().addEntrada("JZ => No hace nada ya que ZF=0");
+                                EventLog.getEventLog().addEntrada("SIG => No hace nada ya que ZF=0");
                             }
                             notificarCambioLineasControl();
                         }
                         if (this.stepCount == 4) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("JZ => No hace nada");
+                            EventLog.getEventLog().addEntrada("SIG => No hace nada");
                         }
                         if (this.stepCount == 5) {
                             this.resetTodasLineasControl();
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("JZ => No hace nada");
+                            EventLog.getEventLog().addEntrada("SIG => No hace nada");
                         }
                     }
                     if (instruccionActual == TipoInstruccion.OUT) {
@@ -486,15 +499,15 @@ public class SistemaSAP implements IClockObserver {
                             EventLog.getEventLog().addEntrada("OUT => No hace nada");
                         }
                     }
-                    if (instruccionActual == TipoInstruccion.HLT) {
+                    if (instruccionActual == TipoInstruccion.FIN) {
                         if (this.stepCount == 3) {
                             this.resetTodasLineasControl();
-                            this.lineasControl[HLT] = true;
+                            this.lineasControl[FIN] = true;
                             notificarCambioLineasControl();
-                            EventLog.getEventLog().addEntrada("HLT => HLT activada");
+                            EventLog.getEventLog().addEntrada("FIN => FIN activada");
                         }
                         // No es necesario manejar stepCount 4 y 5 ya que el 
-                        // reloj ya no puede avanzar con HLT habilitado
+                        // reloj ya no puede avanzar con FIN habilitado
                     }
                     if (instruccionActual == TipoInstruccion.INVALID) {
                         if (this.stepCount == 3) {
@@ -571,7 +584,7 @@ public class SistemaSAP implements IClockObserver {
                 EventLog.getEventLog().addEntrada("Program Counter incrementa");
 
             }
-            if (this.lineasControl[HLT]) {
+            if (this.lineasControl[FIN]) {
                 Clock.getClock().setActivar(true);
             }
             if (this.lineasControl[RI]) {
